@@ -1,19 +1,14 @@
-﻿namespace TaskManagement.DbContexts
+﻿using TaskManagement.DbContexts;
+
+namespace TaskManagement.Models
 {
-    public class TaskInfs
+    public class CreateTask
     {
-        public Guid Id { get; set; }
         public string TaskName { get; set; }
         public string TaskTitle { get; set; }
         public string TaskDetail { get; set; }
         public string TaskTime { get; set; }
         public string TaskStatus { get; set; }
         public string TaskType { get; set; }
-        public ICollection<UserTasks> UserTasks { get; set; }
-
-        public TaskInfs()
-        {
-            UserTasks = new List<UserTasks>();
-        }
     }
 }

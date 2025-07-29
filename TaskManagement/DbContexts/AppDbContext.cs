@@ -9,7 +9,7 @@ public class AppDbContext : IdentityDbContext<ApplicationAccount, IdentityRole<G
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
     #region
-    public DbSet<TaskInfs> Tasks { get; set; }
+    public DbSet<TaskInfs> TaskInfs { get; set; }
     public DbSet<UserTasks> UserTasks { get; set; }
     #endregion
 

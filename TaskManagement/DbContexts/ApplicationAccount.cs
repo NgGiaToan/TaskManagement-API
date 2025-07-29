@@ -2,16 +2,10 @@
 
 namespace TaskManagement.DbContexts
 {
-    public enum AccountStatus { Active, Inactive }
     public class ApplicationAccount : IdentityUser<Guid>
     {
-        public string? Firstname { get; set; }
-        public string? Lastname { get; set; }
-        public string? Contact { get; set; }
-        public string? Address { get; set; }
-        public DateTime Createddate { get; set; } = DateTime.Now;
-        public AccountStatus Status { get; set; } = AccountStatus.Active;
-        public string? Note { get; set; }
+        public string? FullName { get; set; }
+        public string? Image { get; set; }
 
         public ICollection<UserTasks> UserTasks { get; set; }
         public ApplicationAccount()

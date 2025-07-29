@@ -7,5 +7,7 @@
 
         public Guid TaskId { get; set; }
         public TaskInfs Task { get; set; }
+
+        public string Status { get; set; }
     }
 }
