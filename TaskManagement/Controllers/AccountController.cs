@@ -17,10 +17,16 @@ namespace TaskManagement.Controllers
         }
 
         [HttpPost]
-        public async Task<ApplicationAccount> CreateUser(CreateAccount value)
+        public async Task<IActionResult> CreateUser(CreateAccount value)
         {
-            ApplicationAccount account = await _accountService.CreateUser(value);
-            return account;
+            var result = await _accountService.CreateUser(value);
+
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+
+            return Ok(result.User);
         }
 
         [HttpPut]

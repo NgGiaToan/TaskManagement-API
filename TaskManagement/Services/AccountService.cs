@@ -10,11 +10,13 @@ namespace TaskManagement.Services
     public class AccountService : IAccountService
     {
         private readonly AppDbContext _dbContext;
+        private readonly RoleManager<IdentityRole<Guid>> _roleManager;
         private readonly UserManager<ApplicationAccount> _userManager;
-        public AccountService(AppDbContext dbContext, UserManager<ApplicationAccount> userManager)
+        public AccountService(AppDbContext dbContext, UserManager<ApplicationAccount> userManager, RoleManager<IdentityRole<Guid>> roleManager)
         {
             _userManager = userManager;
             _dbContext = dbContext;
+            _roleManager = roleManager;
         }
         public async Task<int> TotalUsers()
         {
@@ -33,14 +35,15 @@ namespace TaskManagement.Services
             return null;
         }
 
-        public async Task<ApplicationAccount> CreateUser(CreateAccount value)
+        public async Task<(bool Success, string Message, ApplicationAccount? User)> CreateUser(CreateAccount value)
         {
             try
             {
+                // Kiểm tra trùng username
                 var checkUsername = await _userManager.FindByNameAsync(value.Username);
                 if (checkUsername != null)
                 {
-                    return null;
+                    return (false, "Username already exists.", null);
                 }
 
                 var user = new ApplicationAccount
@@ -54,27 +57,36 @@ namespace TaskManagement.Services
                     Image = value.Avatar
                 };
 
+                // Tạo user
                 var result = await _userManager.CreateAsync(user, value.Password.Trim());
 
                 if (!result.Succeeded)
                 {
                     var errors = string.Join("; ", result.Errors.Select(e => e.Description));
-
-                    return null;
+                    return (false, $"User creation failed: {errors}", null);
                 }
-                else
+
+                // Kiểm tra role trước khi add
+                if (!await _roleManager.RoleExistsAsync("User"))
                 {
-                    await _userManager.AddToRoleAsync(user, "User");
-                    return user;
+                    var roleResult = await _roleManager.CreateAsync(new IdentityRole<Guid>("User"));
+                    if (!roleResult.Succeeded)
+                    {
+                        var roleErrors = string.Join("; ", roleResult.Errors.Select(e => e.Description));
+                        return (false, $"Role creation failed: {roleErrors}", null);
+                    }
                 }
 
+                await _userManager.AddToRoleAsync(user, "User");
 
+                return (true, "User created successfully.", user);
             }
             catch (Exception ex)
             {
-                return null;
+                return (false, $"Exception occurred: {ex.Message}", null);
             }
         }
+
 
         public async Task<ApplicationAccount> UpdateUser(CreateAccount value, Guid id)
         {
