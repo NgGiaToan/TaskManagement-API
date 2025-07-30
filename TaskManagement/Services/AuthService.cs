@@ -68,56 +68,55 @@ namespace TaskManagement.Services
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public async Task<bool> SignUpAsync(Signup model)
+        public async Task<(bool Success, string Message, ApplicationAccount? User)> SignUpAsync(CreateAccount value)
         {
             try
             {
-                var checkUsername = await _userManager.FindByNameAsync(model.Username);
+                // Kiểm tra trùng username
+                var checkUsername = await _userManager.FindByNameAsync(value.Username);
                 if (checkUsername != null)
                 {
-                    return false;
+                    return (false, "Username already exists.", null);
                 }
 
                 var user = new ApplicationAccount
-                {/**
+                {
                     Id = Guid.NewGuid(),
-                    UserName = model.Username.Trim(),
-                    Firstname = model.Firstname.Trim(),
-                    Lastname = model.Lastname.Trim(),
-                    Email = model.Email.Trim(),
-                    Contact = model.ContactNo.Trim(),
-                    Address = null,
-                    Createddate = DateTime.Now,
-                    Status = 0,
-                    Note = null,
+                    UserName = value.Username.Trim(),
+                    FullName = value.FullName.Trim(),
                     RefreshToken = null,
                     RefreshTokenExpiryTime = null,
-                    LastLogin = null  **/
+                    LastLogin = null,
+                    Image = value.Avatar
                 };
 
-                var result = await _userManager.CreateAsync(user, model.Password.Trim());
+                // Tạo user
+                var result = await _userManager.CreateAsync(user, value.Password.Trim());
 
-                if (result.Succeeded)
-                {
-
-                    if (!await _roleManager.RoleExistsAsync("User"))
-                    {
-                        await _roleManager.CreateAsync(new IdentityRole<Guid>("User"));
-                    }
-
-                    await _userManager.AddToRoleAsync(user, "User");
-                    return true;
-                }
-                else
+                if (!result.Succeeded)
                 {
                     var errors = string.Join("; ", result.Errors.Select(e => e.Description));
-                    return false;
+                    return (false, $"User creation failed: {errors}", null);
                 }
 
+                // Kiểm tra role trước khi add
+                if (!await _roleManager.RoleExistsAsync("User"))
+                {
+                    var roleResult = await _roleManager.CreateAsync(new IdentityRole<Guid>("User"));
+                    if (!roleResult.Succeeded)
+                    {
+                        var roleErrors = string.Join("; ", roleResult.Errors.Select(e => e.Description));
+                        return (false, $"Role creation failed: {roleErrors}", null);
+                    }
+                }
+
+                await _userManager.AddToRoleAsync(user, "User");
+
+                return (true, "User created successfully.", user);
             }
             catch (Exception ex)
             {
-                return false;
+                return (false, $"Exception occurred: {ex.Message}", null);
             }
         }
     }

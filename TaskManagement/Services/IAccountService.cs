@@ -5,7 +5,7 @@ namespace TaskManagement.Services
 {
     public interface IAccountService
     {
-        Task<ApplicationAccount> CreateUser(CreateAccount value);
+        Task<(bool Success, string Message, ApplicationAccount? User)> CreateUser(CreateAccount value);
         Task<ApplicationAccount> UpdateUser(CreateAccount value, Guid id);
         Task<bool> DeleteUser(Guid id);
     }

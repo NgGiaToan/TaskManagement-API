@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TaskManagement.DbContexts;
 using TaskManagement.Models;
@@ -16,25 +17,34 @@ namespace TaskManagement.Controllers
             _accountService = accountService;
         }
 
+
         [HttpPost]
-        public async Task<ApplicationAccount> CreateUser(CreateAccount value)
+        public async Task<IActionResult> CreateUser(CreateAccount value)
         {
-            ApplicationAccount account = await _accountService.CreateUser(value);
-            return account;
+            var result = await _accountService.CreateUser(value);
+
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+
+            return Ok(result.User);
         }
 
+        //[Authorize]
         [HttpPut]
-        public async Task<ApplicationAccount> UpdateUser(CreateAccount value, Guid id)
+        public async Task<IActionResult> UpdateUser(CreateAccount value, Guid id)
         {
             ApplicationAccount account = await _accountService.UpdateUser(value,id);
-            return account;
+            return Ok(account);
         }
 
+        //[Authorize(Roles = "Admin")] 
         [HttpDelete]
-        public async Task<bool> DeleteUser(Guid id)
+        public async Task<IActionResult> DeleteUser(Guid id)
         {
             var account = await _accountService.DeleteUser(id);
-            return true;
+            return Ok();
         }
     }
 }

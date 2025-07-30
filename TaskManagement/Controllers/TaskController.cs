@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using TaskManagement.DbContexts;
-using TaskManagement.Services;
 using TaskManagement.Models;
+using TaskManagement.Services;
 
 namespace TaskManagement.Controllers
 {
@@ -17,6 +19,7 @@ namespace TaskManagement.Controllers
             _taskService = bookService;
         }
 
+        [Authorize]
         [HttpGet("count-by-type")]
         public async Task<IActionResult> GetCount(string n)
         {
@@ -24,6 +27,7 @@ namespace TaskManagement.Controllers
             return Ok(totalTask);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("task-inf")]
         public async Task<IActionResult> GetTask(string n)
         {
@@ -31,6 +35,9 @@ namespace TaskManagement.Controllers
             return Ok(totalTask);
         }
 
+
+
+        [Authorize]
         [HttpGet("task-by-id")]
         public async Task<IActionResult> GetTaskId(Guid n)
         {
@@ -38,6 +45,7 @@ namespace TaskManagement.Controllers
             return Ok(totalTask);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CreateTask(CreateTask task)
         {
@@ -45,6 +53,7 @@ namespace TaskManagement.Controllers
             return Ok(CreateTask);
         }
 
+        [Authorize]
         [HttpPut]
         public async Task<IActionResult> UpdateTask(CreateTask task, Guid id)
         {
@@ -52,6 +61,7 @@ namespace TaskManagement.Controllers
             return Ok(UpdateTask);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public IActionResult DeleteTask(Guid id)
         {
@@ -60,3 +70,6 @@ namespace TaskManagement.Controllers
         }
     }
 }
+
+
+
