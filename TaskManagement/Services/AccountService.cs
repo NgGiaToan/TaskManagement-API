@@ -10,8 +10,12 @@ namespace TaskManagement.Services
     public class AccountService : IAccountService
     {
         private readonly AppDbContext _dbContext;
-        private readonly UserManager<ApplicationAccount> _userManager;
         private readonly RoleManager<IdentityRole<Guid>> _roleManager;
+        private readonly UserManager<ApplicationAccount> _userManager;
+<<<<<<< HEAD
+        private readonly RoleManager<IdentityRole<Guid>> _roleManager;
+=======
+>>>>>>> a9562b585aa95a188f02a32cc14c17eee065d6c1
         public AccountService(AppDbContext dbContext, UserManager<ApplicationAccount> userManager, RoleManager<IdentityRole<Guid>> roleManager)
         {
             _userManager = userManager;
@@ -86,6 +90,7 @@ namespace TaskManagement.Services
                 return (false, $"Exception occurred: {ex.Message}", null);
             }
         }
+
 
         public async Task<ApplicationAccount> UpdateUser(CreateAccount value, Guid id)
         {
