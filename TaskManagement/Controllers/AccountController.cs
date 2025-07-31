@@ -31,15 +31,16 @@ namespace TaskManagement.Controllers
             return Ok(result.User);
         }
 
-        [Authorize]
+        /***[Authorize]
         [HttpPut]
         public async Task<IActionResult> UpdateUser(CreateAccount value, Guid id)
         {
             ApplicationAccount account = await _accountService.UpdateUser(value,id);
             return Ok(account);
-        }
+        }***/
 
-        [Authorize(Roles = "Admin")] 
+
+        //[Authorize(Roles = "Admin")] 
         [HttpDelete]
         public async Task<IActionResult> DeleteUser(Guid id)
         {

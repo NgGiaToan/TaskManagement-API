@@ -24,18 +24,6 @@ namespace TaskManagement.Services
             return (await _userManager.GetUsersInRoleAsync("User")).Count();
         }
 
-        public async Task<ApplicationAccount> ViewUser(Guid id)
-        {
-            /**var user = await _userManager.Users
-                .Where(u => u.Id == id)
-                .Select(u => new ApplicationAccount
-                {
-                    Id = u.Id,
-                }).FirstOrDefaultAsync();
-            return user;**/
-            return null;
-        }
-
         public async Task<(bool Success, string Message, ApplicationAccount? User)> CreateUser(CreateAccount value)
         {
             try

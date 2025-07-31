@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
+using System.Security.Claims;
 using TaskManagement.DbContexts;
 using TaskManagement.Models;
 
@@ -10,16 +12,23 @@ namespace TaskManagement.Services
     {
         private readonly AppDbContext _dbContext;
         private readonly UserManager<ApplicationAccount> _userManager;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public TaskService(AppDbContext myDbContext, UserManager<ApplicationAccount> userManager)
+
+        public TaskService(AppDbContext myDbContext, UserManager<ApplicationAccount> userManager, IHttpContextAccessor httpContextAccessor)
         {
             _dbContext = myDbContext;
             _userManager = userManager;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<int> CountTaskByType(string n)
         {
-            int totalTask = await _dbContext.TaskInfs.Where(t => t.TaskType == n).CountAsync();
+            int totalTask;
+
+            totalTask = await _dbContext.TaskInfs.Where(t => t.TaskType == n).CountAsync();
+            
+
             return totalTask;
         }
 
@@ -71,6 +80,12 @@ namespace TaskManagement.Services
         {
             List<TaskInfs> taskInfs = await _dbContext.TaskInfs.Where(t => t.TaskType == type).ToListAsync();
             return taskInfs;
+        }
+
+        public async Task<List<Guid>> TaskIdByType(string type)
+        {
+            List<Guid> listId = await _dbContext.TaskInfs.Where(t => t.TaskType == type).Select(t=> t.Id).ToListAsync();
+            return listId;
         }
 
         public async Task<TaskInfs> CreateTask(CreateTask taskInf)

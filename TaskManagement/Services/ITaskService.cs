@@ -9,6 +9,7 @@ namespace TaskManagement.Services
         Task<TaskInfs> CreateTask(CreateTask taskInf);
         Task<TaskInfs> UpdateTask(CreateTask taskInf,Guid id);
         Task<List<TaskInfs>> TaskInfByType(string type);
+        Task<List<Guid>> TaskIdByType(string type);
         Task<TaskInformation> TaskInfById(Guid id);
         void DeleteTask(Guid id);
     }

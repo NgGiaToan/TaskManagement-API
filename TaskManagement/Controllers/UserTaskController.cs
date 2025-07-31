@@ -17,7 +17,8 @@ namespace TaskManagement.Controllers
             _userTaskService = bookService;
         }
 
-        [Authorize(Roles = "Admin")]
+
+        //[Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CreateTask(Guid taskId, Guid userId)
         {

@@ -59,12 +59,11 @@ builder.Services.AddIdentityCore<ApplicationAccount>(options =>
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("MyPolicy",
-        policy =>
-        {
-            policy.WithOrigins("http://localhost:4200")
-                                .AllowAnyHeader()
-                                .AllowAnyMethod();
-        });
+        policy => policy
+            .WithOrigins("*")
+            .AllowAnyHeader()
+            .AllowAnyMethod());
+});
 
     //options.AddPolicy("AnotherPolicy",
         //policy =>
@@ -73,7 +72,7 @@ builder.Services.AddCors(options =>
                                 //.AllowAnyHeader()
                                 //.AllowAnyMethod();
         //});
-});
+
 
 
 
@@ -127,7 +126,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors();
+
+app.UseCors("MyPolicy");
 
 app.UseRouting();
 

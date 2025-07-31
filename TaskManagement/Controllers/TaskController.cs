@@ -19,7 +19,7 @@ namespace TaskManagement.Controllers
             _taskService = bookService;
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpGet("count-by-type")]
         public async Task<IActionResult> GetCount([FromQuery] string n)
         {
@@ -27,17 +27,23 @@ namespace TaskManagement.Controllers
             return Ok(totalTask);
         }
 
-        [Authorize(Roles = "Admin")]
+        /***[Authorize(Roles = "Admin")]
         [HttpGet("task-inf")]
         public async Task<IActionResult> GetTask(string n)
         {
             List<TaskInfs> totalTask = await _taskService.TaskInfByType(n);
             return Ok(totalTask);
+        }**/
+
+        //[Authorize(Roles = "Admin")]
+        [HttpGet("list-id")]
+        public async Task<IActionResult> GetListTask(string n)
+        {
+            List<Guid> totalTask = await _taskService.TaskIdByType(n);
+            return Ok(totalTask);
         }
 
-
-
-        [Authorize]
+        //[Authorize]
         [HttpGet("task-by-id")]
         public async Task<IActionResult> GetTaskId(Guid n)
         {
@@ -45,7 +51,7 @@ namespace TaskManagement.Controllers
             return Ok(totalTask);
         }
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CreateTask(CreateTask task)
         {
@@ -53,7 +59,7 @@ namespace TaskManagement.Controllers
             return Ok(CreateTask);
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpPut]
         public async Task<IActionResult> UpdateTask(CreateTask task, Guid id)
         {
@@ -61,7 +67,7 @@ namespace TaskManagement.Controllers
             return Ok(UpdateTask);
         }
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public IActionResult DeleteTask(Guid id)
         {
