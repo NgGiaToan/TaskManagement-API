@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TaskManagement.DbContexts;
 using TaskManagement.Models;
@@ -16,6 +17,7 @@ namespace TaskManagement.Controllers
             _userTaskService = bookService;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CreateTask(Guid taskId, Guid userId)
         {

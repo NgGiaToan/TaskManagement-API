@@ -15,7 +15,7 @@ namespace TaskManagement.Controllers
             _authService = authService;
         }
 
-        [HttpPost]
+        [HttpPost("signin")]
         public async Task<IActionResult> Signin(Signin value)
         {
             var result = await _authService.SignInAsync(value);
@@ -23,6 +23,17 @@ namespace TaskManagement.Controllers
             return Ok(result);
         }
 
+        [HttpPost("signup")]
+        public async Task<IActionResult> SignUp(CreateAccount value)
+        {
+            var result = await _authService.SignUpAsync(value);
 
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+
+            return Ok(result.User);
+        }
     }
 }

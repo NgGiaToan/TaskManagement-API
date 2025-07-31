@@ -21,7 +21,7 @@ namespace TaskManagement.Controllers
 
         [Authorize]
         [HttpGet("count-by-type")]
-        public async Task<IActionResult> GetCount(string n)
+        public async Task<IActionResult> GetCount([FromQuery] string n)
         {
             int totalTask = await _taskService.CountTaskByType(n);
             return Ok(totalTask);

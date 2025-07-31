@@ -31,7 +31,7 @@ namespace TaskManagement.Controllers
             return Ok(result.User);
         }
 
-        //[Authorize]
+        [Authorize]
         [HttpPut]
         public async Task<IActionResult> UpdateUser(CreateAccount value, Guid id)
         {
@@ -39,7 +39,7 @@ namespace TaskManagement.Controllers
             return Ok(account);
         }
 
-        //[Authorize(Roles = "Admin")] 
+        [Authorize(Roles = "Admin")] 
         [HttpDelete]
         public async Task<IActionResult> DeleteUser(Guid id)
         {

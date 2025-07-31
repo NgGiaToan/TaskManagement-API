@@ -25,7 +25,6 @@ builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(options =>
 {
     options.SaveToken = true;
@@ -42,10 +41,41 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddAuthorization();
 
-builder.Services.AddIdentity<ApplicationAccount, IdentityRole<Guid>>()
-    .AddEntityFrameworkStores<AppDbContext>()
-    .AddDefaultTokenProviders();
+
+builder.Services.AddIdentityCore<ApplicationAccount>(options =>
+{
+    options.Password.RequireDigit = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireLowercase = false;
+    options.Password.RequiredLength = 6;
+})
+.AddRoles<IdentityRole<Guid>>()
+.AddSignInManager<SignInManager<ApplicationAccount>>() 
+.AddEntityFrameworkStores<AppDbContext>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("MyPolicy",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:4200")
+                                .AllowAnyHeader()
+                                .AllowAnyMethod();
+        });
+
+    //options.AddPolicy("AnotherPolicy",
+        //policy =>
+        //{
+            //policy.WithOrigins("http://www.contoso.com")
+                                //.AllowAnyHeader()
+                                //.AllowAnyMethod();
+        //});
+});
+
+
 
 builder.Services.AddControllers();
 builder.Services.AddScoped<ITaskService, TaskService>();
@@ -54,6 +84,7 @@ builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IAuthService, AuthService>(); 
 builder.Services.AddScoped<RoleManager<IdentityRole<Guid>>>();
 builder.Services.AddScoped<UserManager<ApplicationAccount>>();
+
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -95,6 +126,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors();
+
+app.UseRouting();
 
 app.UseHttpsRedirection();
 
