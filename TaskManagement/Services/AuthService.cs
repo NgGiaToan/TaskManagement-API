@@ -40,12 +40,13 @@ namespace TaskManagement.Services
 
             if (user == null || !passwordValid)
             {
-                return string.Empty;
+                return null;
             }
 
             var authClaims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, model.Username),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
@@ -96,7 +97,7 @@ namespace TaskManagement.Services
                 if (!result.Succeeded)
                 {
                     var errors = string.Join("; ", result.Errors.Select(e => e.Description));
-                    return (false, $"User creation failed: {errors}", null);
+                    return (false, $"{errors}", null);
                 }
 
                 // Kiểm tra role trước khi add
@@ -106,7 +107,7 @@ namespace TaskManagement.Services
                     if (!roleResult.Succeeded)
                     {
                         var roleErrors = string.Join("; ", roleResult.Errors.Select(e => e.Description));
-                        return (false, $"Role creation failed: {roleErrors}", null);
+                        return (false, $"{roleErrors}", null);
                     }
                 }
 
@@ -116,7 +117,7 @@ namespace TaskManagement.Services
             }
             catch (Exception ex)
             {
-                return (false, $"Exception occurred: {ex.Message}", null);
+                return (false, $"{ex.Message}", null);
             }
         }
     }

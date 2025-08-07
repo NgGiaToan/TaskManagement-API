@@ -24,6 +24,28 @@ namespace TaskManagement.Services
             return (await _userManager.GetUsersInRoleAsync("User")).Count();
         }
 
+        public async Task<List<UserInfDto>> UserList()
+        {
+            var allUsers = await _userManager.Users.ToListAsync();
+            var userList = new List<UserInfDto>();
+
+            foreach (var user in allUsers)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                if (roles.Contains("User"))
+                {
+                    userList.Add(new UserInfDto
+                    {
+                        Id = user.Id,
+                        fullName = user.FullName,
+                        avata = user.Image
+                    });
+                }
+            }
+
+            return userList;
+        }
+
         public async Task<(bool Success, string Message, ApplicationAccount? User)> CreateUser(CreateAccount value)
         {
             try

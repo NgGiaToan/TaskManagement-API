@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using TaskManagement.DbContexts;
 using TaskManagement.Models;
 using TaskManagement.Services;
@@ -17,7 +18,7 @@ namespace TaskManagement.Controllers
             _accountService = accountService;
         }
 
-
+        //[Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateUser(CreateAccount value)
         {
@@ -31,6 +32,13 @@ namespace TaskManagement.Controllers
             return Ok(result.User);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            var accounts = await _accountService.UserList();
+            return Ok(accounts);
+        }
+
         /***[Authorize]
         [HttpPut]
         public async Task<IActionResult> UpdateUser(CreateAccount value, Guid id)
@@ -40,7 +48,7 @@ namespace TaskManagement.Controllers
         }***/
 
 
-        //[Authorize(Roles = "Admin")] 
+        [Authorize(Roles = "Admin")] 
         [HttpDelete]
         public async Task<IActionResult> DeleteUser(Guid id)
         {

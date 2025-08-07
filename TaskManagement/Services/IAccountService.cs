@@ -8,5 +8,6 @@ namespace TaskManagement.Services
         Task<(bool Success, string Message, ApplicationAccount? User)> CreateUser(CreateAccount value);
         Task<ApplicationAccount> UpdateUser(CreateAccount value, Guid id);
         Task<bool> DeleteUser(Guid id);
+        Task<List<UserInfDto>> UserList();
     }
 }

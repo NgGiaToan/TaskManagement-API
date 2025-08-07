@@ -21,45 +21,45 @@ namespace TaskManagement.Controllers
 
         //[Authorize]
         [HttpGet("count-by-type")]
-        public async Task<IActionResult> GetCount([FromQuery] string n)
+        public async Task<IActionResult> GetCount([FromQuery] string type)
         {
-            int totalTask = await _taskService.CountTaskByType(n);
+            int totalTask = await _taskService.CountTaskByType(type);
             return Ok(totalTask);
         }
 
-        /***[Authorize(Roles = "Admin")]
-        [HttpGet("task-inf")]
-        public async Task<IActionResult> GetTask(string n)
+        [Authorize]
+        [HttpGet("get-all")]
+        public async Task<IActionResult> GetAllTask(Guid? userId, string? type, string? sortBy, string? search)
         {
-            List<TaskInfs> totalTask = await _taskService.TaskInfByType(n);
+            List<TaskInformation> totalTask = await _taskService.GetAllTasks(userId, type, sortBy, search);
             return Ok(totalTask);
-        }**/
+        }
 
         //[Authorize(Roles = "Admin")]
-        [HttpGet("list-id")]
-        public async Task<IActionResult> GetListTask(string n)
-        {
-            List<Guid> totalTask = await _taskService.TaskIdByType(n);
-            return Ok(totalTask);
-        }
+        //[HttpGet("list-id")]
+        //public async Task<IActionResult> GetListTask(string n)
+        //{
+            //List<Guid> totalTask = await _taskService.TaskIdByType(n);
+            //return Ok(totalTask);
+        //}
 
-        //[Authorize]
+        [Authorize]
         [HttpGet("task-by-id")]
-        public async Task<IActionResult> GetTaskId(Guid n)
+        public async Task<IActionResult> GetTaskId(Guid id)
         {
-            TaskInformation totalTask = await _taskService.TaskInfById(n);
+            TaskInformation totalTask = await _taskService.TaskInfById(id);
             return Ok(totalTask);
         }
 
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpPost]
-        public async Task<IActionResult> CreateTask(CreateTask task)
+        public async Task<TaskInfs> CreateTask(CreateTask task)
         {
             TaskInfs CreateTask = await _taskService.CreateTask(task);
-            return Ok(CreateTask);
+            return CreateTask;
         }
 
-        //[Authorize]
+        [Authorize]
         [HttpPut]
         public async Task<IActionResult> UpdateTask(CreateTask task, Guid id)
         {
@@ -67,11 +67,17 @@ namespace TaskManagement.Controllers
             return Ok(UpdateTask);
         }
 
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
-        public IActionResult DeleteTask(Guid id)
+        public async Task<IActionResult> DeleteTask(Guid id)
         {
-            _taskService.DeleteTask(id);
+            var isDeleted = await _taskService.DeleteTask(id);
+            
+            if (!isDeleted)
+            {
+                return Ok(new { message = "Task deleted unsuccessfully" });
+            }
+
             return Ok(new { message = "Task deleted successfully" });
         }
     }

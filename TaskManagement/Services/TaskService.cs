@@ -3,8 +3,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using TaskManagement.DbContexts;
 using TaskManagement.Models;
+using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
+using static Microsoft.VisualStudio.Services.Graph.GraphResourceIds;
 
 namespace TaskManagement.Services
 {
@@ -30,6 +33,103 @@ namespace TaskManagement.Services
             
 
             return totalTask;
+        }
+
+        public async Task<List<TaskInfs>> TaskInfByUserId(Guid userId)
+        {
+            var taskIds = await _dbContext.UserTasks
+                .Where(ut => ut.UserId == userId)
+                .Select(ut => ut.TaskId)
+                .ToListAsync();
+            if (taskIds == null || !taskIds.Any())
+                return new List<TaskInfs>();
+            var tasks = await _dbContext.TaskInfs
+                .Where(t => taskIds.Contains(t.Id))
+                .ToListAsync();
+            return tasks;
+        }
+
+        public async Task<List<TaskInformation>> GetAllTasks(Guid? userId,string? type, string? sortBy, string? search)
+        {
+            var tasks = await _dbContext.TaskInfs.ToListAsync();
+
+            if (tasks == null)
+                return null;
+
+            var taskDetails = new List<TaskInformation>();
+
+            foreach (var task in tasks)
+            {
+                var accountIds = await _dbContext.UserTasks
+                .Where(ut => ut.TaskId == task.Id)
+                .Select(ut => ut.UserId)
+                .ToListAsync();
+
+                var accounts = new List<ApplicationAccount>();
+                foreach (var accountId in accountIds)
+                {
+                    var user = await _userManager.FindByIdAsync(accountId.ToString());
+                    if (user != null)
+                    {
+                        accounts.Add(new ApplicationAccount
+                        {
+                            Id = user.Id,
+                            Image = user.Image
+                        });
+                    }
+                }
+
+                TaskInformation taskDetail = new TaskInformation
+                {
+                    Id = task.Id,
+                    TaskName = task.TaskName,
+                    TaskTitle = task.TaskTitle,
+                    TaskDetail = task.TaskDetail,
+                    TaskTime = task.TaskTime,
+                    TaskStatus = task.TaskStatus,
+                    TaskType = task.TaskType,
+                    Accounts = accounts,
+                };
+
+                taskDetails.Add(taskDetail);
+            }
+            
+            // Get tasks by userId
+            if (userId != null)
+            {
+                taskDetails = taskDetails.Where(t => t.Accounts != null && t.Accounts.Any(a => a.Id == userId)).ToList();
+            }
+
+            // Get tasks by type
+            if (type != null)
+            {
+                taskDetails = taskDetails
+                .Where(t => t.TaskType == type)
+                .ToList();
+
+            }
+
+            //Sort tasks
+            if (sortBy != null)
+            {
+                taskDetails = taskDetails
+                .OrderBy(t => t.GetType().GetProperty(sortBy)?.GetValue(t, null))
+                .ToList();
+            }
+
+            //Search taks
+            if (search != null)
+            {
+                taskDetails = taskDetails
+                .Where(t =>
+                    t.TaskName.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                    t.TaskTitle.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                    t.TaskStatus.Contains(search, StringComparison.OrdinalIgnoreCase)
+                )
+                .ToList();
+            }
+
+            return taskDetails;
         }
 
         public async Task<TaskInformation> TaskInfById(Guid id)
@@ -82,11 +182,11 @@ namespace TaskManagement.Services
             return taskInfs;
         }
 
-        public async Task<List<Guid>> TaskIdByType(string type)
-        {
-            List<Guid> listId = await _dbContext.TaskInfs.Where(t => t.TaskType == type).Select(t=> t.Id).ToListAsync();
-            return listId;
-        }
+        //public async Task<List<Guid>> TaskIdByType(string type)
+        //{
+           // List<Guid> listId = await _dbContext.TaskInfs.Where(t => t.TaskType == type).Select(t=> t.Id).ToListAsync();
+           // return listId;
+        //}
 
         public async Task<TaskInfs> CreateTask(CreateTask taskInf)
         {
@@ -99,9 +199,9 @@ namespace TaskManagement.Services
                     TaskName = taskInf.TaskName,
                     TaskTitle = taskInf.TaskTitle,
                     TaskDetail = taskInf.TaskDetail,
-                    TaskTime = taskInf.TaskTime,
-                    TaskStatus = "",
-                    TaskType = "To do",
+                    TaskTime = DateTime.UtcNow.ToString("o"),
+                    TaskStatus = taskInf.TaskStatus,
+                    TaskType = taskInf.TaskType,
                 };
 
                 _dbContext.TaskInfs.Add(task);
@@ -127,7 +227,6 @@ namespace TaskManagement.Services
                 task.TaskName = taskInf.TaskName;
                 task.TaskTitle = taskInf.TaskTitle;
                 task.TaskDetail = taskInf.TaskDetail;
-                task.TaskTime = taskInf.TaskTime;
                 task.TaskStatus = taskInf.TaskStatus;
                 task.TaskType = taskInf.TaskType;
 
@@ -141,7 +240,7 @@ namespace TaskManagement.Services
             }
         }
 
-        public async void DeleteTask(Guid id)
+        public async Task<bool> DeleteTask(Guid id)
         {
             try
             {
@@ -150,12 +249,81 @@ namespace TaskManagement.Services
                 {
                     _dbContext.TaskInfs.Remove(task);
                     await _dbContext.SaveChangesAsync();
+                    return true;
                 }
+
+                return false;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error deleting task: {ex.Message}");
+                return false;
             }
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
